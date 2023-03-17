@@ -5,11 +5,14 @@
     "cdk-microservices": "bin/cdk-microservices.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
   },
+  "workspaces": [
+    "modules/*"
+  ],
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@types/node": "18.13.0",
