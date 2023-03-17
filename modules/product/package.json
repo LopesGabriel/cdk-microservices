@@ -11,5 +11,9 @@
   },
   "keywords": [],
   "author": "Gabriel Lopes",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.294.0",
+    "@aws-sdk/util-dynamodb": "^3.294.0"
+  }
 }
