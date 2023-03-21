@@ -1,4 +1,4 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { IProductRepository } from "../IProductRepository";
@@ -68,8 +68,18 @@ class ProductRepository implements IProductRepository {
     // TODO
   }
 
-  async delete() {
-    // TODO
+  async delete(productId: string) {
+    const deleteParams: DeleteItemCommandInput = {
+      Key: marshall({ id: productId }),
+      TableName: this.tableName
+    }
+
+    try {
+      await this.dynamo.send(new DeleteItemCommand(deleteParams));
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 }
 
