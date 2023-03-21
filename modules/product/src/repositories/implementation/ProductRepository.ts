@@ -1,7 +1,7 @@
-import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput, UpdateItemCommand, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
-import { IProductRepository } from "../IProductRepository";
+import { IProductRepository, IUpdateProductArgs } from "../IProductRepository";
 
 class ProductRepository implements IProductRepository {
   private tableName = process.env.DYNAMODB_TABLE_NAME!;
@@ -12,15 +12,17 @@ class ProductRepository implements IProductRepository {
   }
 
   async create(data: any) {
+    const now = new Date().toISOString();
+    const product = { ...data, CreatedAt: now, UpdatedAt: now }
     const putParams: PutItemCommandInput = {
-      Item: marshall(data, { removeUndefinedValues: true }),
+      Item: marshall(product, { removeUndefinedValues: true }),
       TableName: this.tableName
     }
 
     try {
       const createResult = await this.dynamo.send(new PutItemCommand(putParams));
       console.log('Create result:', createResult);
-      return data;
+      return product;
     } catch (err) {
       console.error(err);
       throw err;
@@ -64,8 +66,49 @@ class ProductRepository implements IProductRepository {
     }
   }
 
-  async update() {
-    // TODO
+  async update(data: IUpdateProductArgs) {
+    const product = { ...data, UpdatedAt: new Date().toISOString() };
+    const updateParams: UpdateItemCommandInput = {
+      Key: marshall({ id: product.id }),
+      TableName: this.tableName,
+      ExpressionAttributeValues: {
+        ...marshall({ ':updatedAt': product.UpdatedAt })
+      },
+      UpdateExpression: "set UpdatedAt = :updatedAt",
+      ReturnValues: "ALL_NEW"
+    }
+
+    if (product.ProductDescription !== undefined) {
+      updateParams.UpdateExpression += ", ProductDescription = :productDescription";
+      updateParams.ExpressionAttributeValues = {
+        ...updateParams.ExpressionAttributeValues,
+        ...marshall({ ':productDescription': product.ProductDescription })
+      }
+    }
+
+    if (product.ProductName !== undefined) {
+      updateParams.UpdateExpression += ", ProductName = :productName";
+      updateParams.ExpressionAttributeValues = {
+        ...updateParams.ExpressionAttributeValues,
+        ...marshall({ ':productName': product.ProductName })
+      }
+    }
+
+    if (product.ProductPrice !== undefined) {
+      updateParams.UpdateExpression += ", ProductPrice = :productPrice";
+      updateParams.ExpressionAttributeValues = {
+        ...updateParams.ExpressionAttributeValues,
+        ...marshall({ ':productPrice': product.ProductPrice })
+      }
+    }
+
+    try {
+      const data = await this.dynamo.send(new UpdateItemCommand(updateParams));
+      return data;
+    } catch (err) {
+      console.error(err)
+      throw err;
+    }
   }
 
   async delete(productId: string) {

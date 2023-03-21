@@ -4,6 +4,7 @@ import { CreateProductUseCase } from "./useCases/CreateProduct";
 import { DeleteProductUseCase } from "./useCases/DeleteProduct";
 import { GetAllProductsUseCase } from "./useCases/GetAllProducts";
 import { GetProductByIdUseCase } from "./useCases/GetProductById";
+import { UpdateProductUseCase } from "./useCases/UpdateProduct";
 
 const productRepo = new ProductRepository();
 
@@ -11,6 +12,7 @@ const getProductByIdUseCase = new GetProductByIdUseCase(productRepo);
 const getAllProductsUseCase = new GetAllProductsUseCase(productRepo);
 const createProductUseCase = new CreateProductUseCase(productRepo);
 const deleteProductUseCase = new DeleteProductUseCase(productRepo);
+const updateProductUseCase = new UpdateProductUseCase(productRepo);
 
 const handler: APIGatewayProxyHandler = async (event) => {
   console.log("request", JSON.stringify(event, null, 2));
@@ -54,7 +56,27 @@ const handler: APIGatewayProxyHandler = async (event) => {
       return {
         statusCode: 200,
         body: JSON.stringify(await deleteProductUseCase.handle(pathParameters))
-      }     
+      }
+    case "PUT":
+      if (pathParameters === null) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: "Missing product id" })
+        }
+      }
+      if (body === null) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({
+            message: "Request body is required"
+          })
+        }
+      }
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(await updateProductUseCase.handle({ pathParameters, body }))
+      }
     default:
       console.error(`${httpMethod} not supported`, JSON.stringify(event, null, 2));
       return {
