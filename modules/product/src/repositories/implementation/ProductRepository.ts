@@ -1,4 +1,4 @@
-import { DynamoDBClient, GetItemCommand, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand, PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 import { IProductRepository } from "../IProductRepository";
@@ -11,8 +11,20 @@ class ProductRepository implements IProductRepository {
     this.dynamo = new DynamoDBClient({});
   }
 
-  async create() {
-    // TODO
+  async create(data: any) {
+    const putParams: PutItemCommandInput = {
+      Item: marshall(data, { removeUndefinedValues: true }),
+      TableName: this.tableName
+    }
+
+    try {
+      const createResult = await this.dynamo.send(new PutItemCommand(putParams));
+      console.log('Create result:', createResult);
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
   }
 
   async get(productId: string) {

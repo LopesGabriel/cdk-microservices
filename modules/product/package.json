@@ -4,7 +4,8 @@
   "description": "Product microservice",
   "main": "build/index.js",
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.111"
+    "@types/aws-lambda": "^8.10.111",
+    "@types/uuid": "^9.0.1"
   },
   "scripts": {
     "build": "tsc --build"
@@ -14,6 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.294.0",
-    "@aws-sdk/util-dynamodb": "^3.294.0"
+    "@aws-sdk/util-dynamodb": "^3.294.0",
+    "uuid": "^9.0.0",
+    "zod": "^3.21.4"
   }
 }

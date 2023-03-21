@@ -1,7 +1,7 @@
 import { APIGatewayProxyEventPathParameters } from "aws-lambda";
 import { IProductRepository } from "../repositories/IProductRepository";
 
-class GetProductById {
+class GetProductByIdUseCase {
   constructor(private repo: IProductRepository){}
 
   handle(pathParams: APIGatewayProxyEventPathParameters) {
@@ -13,4 +13,4 @@ class GetProductById {
   }
 }
 
-export { GetProductById };
+export { GetProductByIdUseCase };

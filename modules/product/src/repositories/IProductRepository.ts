@@ -1,5 +1,5 @@
 interface IProductRepository {
-  create: () => Promise<void>;
+  create: (data: any) => Promise<any>;
   get: (productId: string) => Promise<Record<string, any>>;
   list: () => Promise<Record<string, any>[]>;
   update: () => Promise<void>;
