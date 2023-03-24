@@ -104,6 +104,10 @@ class ProductRepository implements IProductRepository {
 
     try {
       const data = await this.dynamo.send(new UpdateItemCommand(updateParams));
+      if (data.Attributes) {
+        return unmarshall(data.Attributes);
+      }
+
       return data;
     } catch (err) {
       console.error(err)
