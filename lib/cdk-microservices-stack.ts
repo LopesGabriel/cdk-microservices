@@ -34,7 +34,7 @@ export class CdkMicroservicesStack extends cdk.Stack {
 
     const productFunction = new NodejsFunction(this, 'ProductLambdaFunction', {
       ...nodeJsFunctionProps,
-      entry: join(__dirname, `../modules/product/build/index.js`),
+      entry: join(__dirname, `../modules/product/src/index.ts`),
     });
 
     productTable.grantReadWriteData(productFunction); // Granting Lambda access to DynamoDB
