@@ -8,9 +8,10 @@ export class CdkMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const { productTable } = new SwnDatabase(this, 'Databases')
+    const { productTable, basketTable } = new SwnDatabase(this, 'Databases')
     const { productMicroservice } = new SwnMicroservice(this, 'Microservices', {
-      productTable
+      productTable,
+      basketTable
     })
     const apiGateway = new SwnApiGateway(this, 'Apis', { productMicroservice })
   }

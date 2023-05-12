@@ -6,16 +6,20 @@ import { join } from "path";
 
 interface ISwnMicroservicesProps {
   productTable: ITable
+  basketTable: ITable
 }
 
 export class SwnMicroservice extends Construct {
   public readonly productMicroservice: IFunction
+  public readonly basketMicroservice: IFunction
 
   constructor(scope: Construct, id: string, props: ISwnMicroservicesProps) {
     super(scope, id)
-    const { productTable } = props
+    this.productMicroservice = this.createProductMicroservice(props)
+    this.basketMicroservice = this.createBasketMicroservice(props)
+  }
 
-    /**   Lambda Setup    */
+  private createProductMicroservice({ productTable }: ISwnMicroservicesProps): IFunction {
     const nodeJsFunctionProps: NodejsFunctionProps = {
       bundling: {
         externalModules: ['aws-sdk'],
@@ -27,12 +31,33 @@ export class SwnMicroservice extends Construct {
       runtime: Runtime.NODEJS_18_X
     };
 
-    this.productMicroservice = new NodejsFunction(this, 'ProductLambdaFunction', {
+    const productMicroservice = new NodejsFunction(this, 'ProductLambdaFunction', {
       ...nodeJsFunctionProps,
       entry: join(__dirname, `../modules/product/src/index.ts`),
     });
 
-    // Granting Lambda access to DynamoDB
-    productTable.grantReadWriteData(this.productMicroservice);
+    productTable.grantReadWriteData(productMicroservice);
+    return productMicroservice
+  }
+
+  private createBasketMicroservice({ basketTable }: ISwnMicroservicesProps): IFunction {
+    const nodeJsFunctionProps: NodejsFunctionProps = {
+      bundling: {
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        PRIMARY_KEY: 'userName',
+        DYNAMODB_TABLE_NAME: basketTable.tableName
+      },
+      runtime: Runtime.NODEJS_18_X
+    };
+
+    const basketMicroservice = new NodejsFunction(this, 'BasketLambdaFunction', {
+      ...nodeJsFunctionProps,
+      entry: join(__dirname, `../modules/basket/src/index.ts`),
+    });
+
+    basketTable.grantReadWriteData(basketMicroservice)
+    return basketMicroservice
   }
 }
