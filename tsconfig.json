@@ -27,6 +27,9 @@
   "references": [
     {
       "path": "./modules/product"
+    },
+    {
+      "path": "./modules/basket"
     }
   ],
   "exclude": [
