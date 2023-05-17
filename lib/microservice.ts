@@ -49,7 +49,7 @@ export class SwnMicroservice extends Construct {
         PRIMARY_KEY: 'userName',
         DYNAMODB_TABLE_NAME: basketTable.tableName
       },
-      runtime: Runtime.NODEJS_18_X
+      runtime: Runtime.NODEJS_18_X,
     };
 
     const basketMicroservice = new NodejsFunction(this, 'BasketLambdaFunction', {
