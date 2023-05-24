@@ -5,12 +5,14 @@ import { Construct } from "constructs"
 export class SwnDatabase extends Construct {
   public readonly productTable: ITable;
   public readonly basketTable: ITable;
+  public readonly orderingTable: ITable;
 
   constructor(scope: Construct, id: string) {
     super(scope, id)
 
     this.productTable = this.createProductTable()
     this.basketTable = this.createBasketTable()
+    this.orderingTable = this.createOrderingTable()
   }
 
   private createProductTable(): ITable {
@@ -26,9 +28,18 @@ export class SwnDatabase extends Construct {
     return new Table(this, 'BasketTable', {
       partitionKey: { name: 'userName', type: AttributeType.STRING },
       tableName: 'basket',
-      billingMode: BillingMode.PROVISIONED,
-      writeCapacity: 1,
-      readCapacity: 1,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY
+    })
+  }
+
+  private createOrderingTable(): ITable {
+    return new Table(this, 'OrderingTable', {
+      partitionKey: { name: 'userName', type: AttributeType.STRING },
+      sortKey: { name: 'orderDate', type: AttributeType.STRING },
+      tableName: 'order',
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY
     })
   }
 }
