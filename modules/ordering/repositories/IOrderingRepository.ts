@@ -1,0 +1,5 @@
+interface IOrderingRepository {
+
+}
+
+export { IOrderingRepository }

@@ -10,16 +10,20 @@ export class CdkMicroservicesStack extends Stack {
     super(scope, id, props);
 
     const { productTable, basketTable, orderingTable } = new SwnDatabase(this, 'Databases')
-    const { productMicroservice, basketMicroservice, orderingMicroservice } = new SwnMicroservice(this, 'Microservices', {
+    const { productMicroservice, basketMicroservice, orderMicroservice } = new SwnMicroservice(this, 'Microservices', {
       productTable,
       basketTable,
       orderingTable
     })
-    const apiGateway = new SwnApiGateway(this, 'Apis', { productMicroservice, basketMicroservice })
+    const apiGateway = new SwnApiGateway(this, 'Apis', {
+      productMicroservice,
+      basketMicroservice,
+      orderMicroservice
+    })
 
     const event = new SwnEventBus(this, 'EventBus', {
       publisherFunction: basketMicroservice,
-      targetFunction: orderingMicroservice
+      targetFunction: orderMicroservice
     })
   }
 }

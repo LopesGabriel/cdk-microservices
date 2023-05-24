@@ -13,13 +13,13 @@ interface ISwnMicroservicesProps {
 export class SwnMicroservice extends Construct {
   public readonly productMicroservice: IFunction
   public readonly basketMicroservice: IFunction
-  public readonly orderingMicroservice: IFunction
+  public readonly orderMicroservice: IFunction
 
   constructor(scope: Construct, id: string, props: ISwnMicroservicesProps) {
     super(scope, id)
     this.productMicroservice = this.createProductMicroservice(props)
     this.basketMicroservice = this.createBasketMicroservice(props)
-    this.orderingMicroservice = this.createOrderingMicroservice(props)
+    this.orderMicroservice = this.createOrderingMicroservice(props)
   }
 
   private createProductMicroservice({ productTable }: ISwnMicroservicesProps): IFunction {
