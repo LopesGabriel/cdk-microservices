@@ -10,10 +10,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.115",
-    "@types/aws-sdk": "^2.7.0"
+    "@types/aws-lambda": "^8.10.115"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.363.0",
+    "@aws-sdk/client-eventbridge": "^3.363.0",
+    "@aws-sdk/util-dynamodb": "^3.365.0",
     "zod": "^3.21.4"
   }
 }
