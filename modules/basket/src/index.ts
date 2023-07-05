@@ -5,12 +5,15 @@ import { ListBasketUseCase } from './useCases/ListBasketUseCase';
 import { CreateBasketUseCase } from './useCases/CreateBasketUseCase';
 import { CheckoutBasketUseCase } from './useCases/CheckoutBasketUseCase';
 import { DeleteBasketUseCase } from './useCases/DeleteBasketUseCase';
+import { EventBridgeRepository } from './repositories/implementation/EventBridgeRepository';
 
 const basketRepo = new BasketDynamoRepository();
+const eventBridgeRepo = new EventBridgeRepository();
+
 const createBasketUseCase = new CreateBasketUseCase(basketRepo);
 const getBasketUseCase = new GetBasketUseCase(basketRepo);
 const listBasketUseCase = new ListBasketUseCase(basketRepo);
-const checkoutUseCase = new CheckoutBasketUseCase(basketRepo);
+const checkoutUseCase = new CheckoutBasketUseCase(basketRepo, eventBridgeRepo);
 const deleteBasketUseCase = new DeleteBasketUseCase(basketRepo);
 
 const handler: APIGatewayProxyHandler = async (event, _context) => {

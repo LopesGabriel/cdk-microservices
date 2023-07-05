@@ -9,6 +9,9 @@ interface SwnEventBusProps {
 }
 
 export class SwnEventBus extends Construct {
+  public readonly busName: string;
+  public readonly ruleName: string;
+
   constructor(scope: Construct, id: string, props: SwnEventBusProps) {
     super(scope, id);
     const { publisherFunction, targetFunction } = props
@@ -30,5 +33,8 @@ export class SwnEventBus extends Construct {
 
     checkoutBasketRule.addTarget(new LambdaFunction(targetFunction))
     bus.grantPutEventsTo(publisherFunction)
+
+    this.busName = bus.eventBusName;
+    this.ruleName = checkoutBasketRule.ruleName;
   }
 }
