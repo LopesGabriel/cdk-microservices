@@ -20,6 +20,8 @@ const handler: APIGatewayProxyHandler = async (event, _context) => {
   let body;
   let statusCode = 200;
 
+  console.log(event)
+
   switch (event.httpMethod) {
     case "GET":
       if (event.pathParameters != null) {
@@ -27,6 +29,7 @@ const handler: APIGatewayProxyHandler = async (event, _context) => {
       } else {
         body = await listBasketUseCase.handle();
       }
+      break;
     case "POST":
       if (event.path.includes("checkout")) {
         body = await checkoutUseCase.handle(event);
@@ -34,8 +37,10 @@ const handler: APIGatewayProxyHandler = async (event, _context) => {
         body = await createBasketUseCase.handle(event);
         statusCode = 201;
       }
+      break;
     case "DELETE":
       body = await deleteBasketUseCase.handle(event);
+      break;
   }
 
   console.debug(JSON.stringify(body, null, 2));

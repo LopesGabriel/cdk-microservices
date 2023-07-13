@@ -10,6 +10,10 @@ class CreateBasketUseCase {
   }
 
   public async handle(event: APIGatewayProxyEvent) {
+    if (!event.body) {
+      throw new Error('Body is required!')
+    }
+
     const schema = z.object({
       userName: z.string(),
       items: z.array(z.object({
@@ -23,7 +27,7 @@ class CreateBasketUseCase {
 
     const {
       userName, items
-    } = schema.parse(event);
+    } = schema.parse(JSON.parse(event.body));
 
     const basket = await this.repo.create({
       userName,

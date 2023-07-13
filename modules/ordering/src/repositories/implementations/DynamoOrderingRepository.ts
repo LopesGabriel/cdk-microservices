@@ -11,7 +11,7 @@ class DynamoOrderingRepository implements IOrderingRepository {
 
   async create(order: any) {
     const params: PutItemCommandInput = {
-      TableName: process.env.DYNAMO_TABLE_NAME,
+      TableName: process.env.DYNAMODB_TABLE_NAME,
       Item: marshall(order)
     }
 
@@ -20,7 +20,7 @@ class DynamoOrderingRepository implements IOrderingRepository {
 
   async getByUsernameAndOrderDate(userName: string, orderDate: string) {
     const params: QueryCommandInput = {
-      TableName: process.env.DYNAMO_TABLE_NAME,
+      TableName: process.env.DYNAMODB_TABLE_NAME,
       KeyConditionExpression: "userName = :userName and orderDate = :orderDate",
       ExpressionAttributeValues: {
         ":userName": { S: userName },
@@ -44,7 +44,7 @@ class DynamoOrderingRepository implements IOrderingRepository {
   async getAllOrders() {
     try {
       const { Items } = await this.dbClient.send(new ScanCommand({
-        TableName: process.env.DYNAMO_TABLE_NAME
+        TableName: process.env.DYNAMODB_TABLE_NAME
       }))
 
       if (Items) {

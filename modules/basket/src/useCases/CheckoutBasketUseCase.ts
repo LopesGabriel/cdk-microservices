@@ -24,7 +24,7 @@ class CheckoutBasketUseCase {
     const { attributes, userName } = bodySchema.parse(JSON.parse(event.body));
 
     const basket = await this.repo.get(userName);
-    const checkkoutPayload = this.prepareOrderPayload({ attributes, userName }, basket);
+    const checkkoutPayload = this.prepareOrderPayload({ ...attributes, userName }, basket);
     const publishedEvent = await this.eventBridge.publishCheckoutBasketEvent(checkkoutPayload);
     console.log('Put event output:', { ...publishedEvent });
     await this.repo.delete(userName);

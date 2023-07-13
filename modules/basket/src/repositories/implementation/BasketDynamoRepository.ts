@@ -1,5 +1,6 @@
+import { AttributeValue, DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, GetItemCommandInput, KeySchemaElement, PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput, ScanCommandOutput, UpdateItemCommand, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { IBasketRepository } from "../IBasketRepository";
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 const {
   PRIMARY_KEY,
@@ -7,24 +8,20 @@ const {
 } = process.env;
 
 class BasketDynamoRepository implements IBasketRepository {
-  private repo: DocumentClient;
+  private repo: DynamoDBClient;
 
   constructor() {
-    this.repo = new DocumentClient()
+    this.repo = new DynamoDBClient({});
   }
 
   async create(data: any) {
-    const params: DocumentClient.PutItemInput = {
+    const params: PutItemCommandInput = {
       TableName: DYNAMODB_TABLE_NAME!,
-      Item: data,
+      Item: marshall(data),
     }
 
     try {
-      const op = await this.repo.put(params).promise();
-
-      if (op.$response.error) {
-        throw op.$response.error
-      }
+      await this.repo.send(new PutItemCommand(params))
 
       return data
     } catch (err) {
@@ -34,20 +31,16 @@ class BasketDynamoRepository implements IBasketRepository {
   }
 
   async get(userName: string) {
-    const params: DocumentClient.GetItemInput = {
+    const params: GetItemCommandInput = {
       TableName: DYNAMODB_TABLE_NAME!,
       Key: { },
     }
-    params.Key[PRIMARY_KEY!] = userName;
+    params.Key![PRIMARY_KEY!] = { S: userName }
 
     try {
-      const op = await this.repo.get(params).promise();
+      const op = await this.repo.send(new GetItemCommand(params))
 
-      if (op.$response.error) {
-        throw op.$response.error
-      }
-
-      return op.Item!
+      return unmarshall(op.Item!)
     } catch (err) {
       console.error(err);
       throw err;
@@ -56,24 +49,20 @@ class BasketDynamoRepository implements IBasketRepository {
 
   async list() {
     const items: any[] = [];
-    const params: DocumentClient.ScanInput = {
+    const params: ScanCommandInput = {
       TableName: DYNAMODB_TABLE_NAME!
     }
 
     try {
-      let lastEvaluatedItem: undefined | DocumentClient.Key;
+      let lastEvaluatedItem: Record<string, AttributeValue> | undefined = undefined;
       do {
-        const op = await this.repo.scan({
+        const op: ScanCommandOutput = await this.repo.send(new ScanCommand({
           ...params,
           ExclusiveStartKey: lastEvaluatedItem
-        }).promise();
-
-        if (op.$response.error) {
-          throw op.$response.error;
-        }
+        }));
 
         lastEvaluatedItem = op.LastEvaluatedKey;
-        if (op.Items) items.push(...op.Items);
+        if (op.Items) items.push(...op.Items.map(item => unmarshall(item)));
       } while(lastEvaluatedItem);
     } catch (err) {
       console.error(err)
@@ -84,17 +73,18 @@ class BasketDynamoRepository implements IBasketRepository {
   }
 
   async update(data: any) {
-    const params: DocumentClient.UpdateItemInput = {
+    const params: UpdateItemCommandInput = {
       TableName: DYNAMODB_TABLE_NAME!,
-      Key: {},
+      Key: {
+        [PRIMARY_KEY!]: { S: data[PRIMARY_KEY!] }
+      },
       ReturnValues: 'ALL_NEW',
     }
-    params.Key[PRIMARY_KEY!] = data[PRIMARY_KEY!];
 
     for (let [key, value] of Object.entries(data)) {
       params.ExpressionAttributeValues = {
         ...params.ExpressionAttributeValues,
-        [`:${key}`]: value
+        [`:${key}`]: marshall(value)
       }
       params.UpdateExpression = params.UpdateExpression
         ? params.UpdateExpression += `SET ${key} = :${key} `
@@ -102,12 +92,7 @@ class BasketDynamoRepository implements IBasketRepository {
     }
 
     try {
-      const op = await this.repo.update(params).promise();
-
-      if (op.$response.error) {
-        throw op.$response.error;
-      }
-
+      const op = await this.repo.send(new UpdateItemCommand(params))
       if (op.Attributes) return op.Attributes;
       return data;
     } catch (err) {
@@ -116,20 +101,16 @@ class BasketDynamoRepository implements IBasketRepository {
     }
   }
 
-  async delete(useName: string) {
-    const params: DocumentClient.DeleteItemInput = {
+  async delete(userName: string) {
+    const params: DeleteItemCommandInput = {
       TableName: DYNAMODB_TABLE_NAME!,
       Key: {
-        [`${PRIMARY_KEY}`]: useName
+        [PRIMARY_KEY!]: { S: userName }
       }
     }
 
     try {
-      const op = await this.repo.delete(params).promise()
-
-      if (op.$response.error) {
-        throw op.$response.error
-      }
+      const op = await this.repo.send(new DeleteItemCommand(params))
     } catch (err) {
       console.error(err);
       throw err;
