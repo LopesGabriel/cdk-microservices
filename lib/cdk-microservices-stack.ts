@@ -4,6 +4,7 @@ import { SwnDatabase } from './database';
 import { SwnMicroservice } from './microservice';
 import { SwnApiGateway } from './apigateway';
 import { SwnEventBus } from './eventBus';
+import { SwnQueue } from './queue';
 
 export class CdkMicroservicesStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -15,6 +16,11 @@ export class CdkMicroservicesStack extends Stack {
       basketTable,
       orderingTable
     })
+
+    const { orderQueue } = new SwnQueue(this, 'Queue', {
+      consumer: orderMicroservice
+    })
+
     const apiGateway = new SwnApiGateway(this, 'Apis', {
       productMicroservice,
       basketMicroservice,
@@ -23,7 +29,7 @@ export class CdkMicroservicesStack extends Stack {
 
     const event = new SwnEventBus(this, 'EventBus', {
       publisherFunction: basketMicroservice,
-      targetFunction: orderMicroservice
+      targetQueue: orderQueue
     })
   }
 }
